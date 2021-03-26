@@ -25,8 +25,9 @@ import sys
 import logging
 from requests.exceptions import ConnectionError
 
-logging.basicConfig(filename=LOG_FILE,format='%(asctime)s %(levelname)s:%(message)s',level=logging.INFO)
+logging.basicConfig(filename=LOG_FILE,format='%(asctime)s %(levelname)s:%(message)s', level=logging.INFO)
 
+all_signals = ['SIGABRT', 'SIGALRM', 'SIGBUS', 'SIGCHLD', 'SIGEMT', 'SIGFPE', 'SIGHUP', 'SIGILL', 'SIGINFO', 'SIGINT', 'SIGIO', 'SIGIOT', 'SIGPIPE', 'SIGPROF', 'SIGQUIT', 'SIGSEGV', 'SIGSYS', 'SIGTERM', 'SIGTRAP', 'SIGTSTP', 'SIGTTIN', 'SIGTTOU', 'SIGURG', 'SIGUSR1', 'SIGUSR2', 'SIGVTALRM', 'SIGWINCH', 'SIGXCPU', 'SIGXFSZ']
 
 def receive_signal(signum, stack):
     if signum in [1,2,3,15]:
@@ -35,11 +36,10 @@ def receive_signal(signum, stack):
     else:        print('Caught signal %s, ignoring.' %(str(signum)))
 
 if __name__ == '__main__':
-    uncatchable = ['SIG_DFL','SIGSTOP','SIGKILL']
-    for i in [x for x in dir(signal) if x.startswith("SIG")]:
-        if not i in uncatchable:
-            signum = getattr(signal,i)
-            signal.signal(signum,receive_signal)
+    # bleeding eyes
+    for sig in all_signals:
+       signum = getattr(signal, sig)
+       signal.signal(signum, receive_signal)
 
     sqs_connection, sqs_queue = queue.create_queue()
     sns_connection, subscription_arn = queue.subscribe_sns(sqs_queue)
