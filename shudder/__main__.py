@@ -25,21 +25,21 @@ import sys
 import logging
 from requests.exceptions import ConnectionError
 
-logging.basicConfig(filename=LOG_FILE,format='%(asctime)s %(levelname)s:%(message)s',level=logging.INFO)
+logging.basicConfig(filename=LOG_FILE,format='%(asctime)s %(levelname)s:%(message)s', level=logging.INFO)
 
+all_signals = ['SIGABRT', 'SIGALRM', 'SIGBUS', 'SIGCHLD', 'SIGFPE', 'SIGHUP', 'SIGILL', 'SIGINT', 'SIGIO', 'SIGIOT', 'SIGPIPE', 'SIGPROF', 'SIGQUIT', 'SIGSEGV', 'SIGSYS', 'SIGTERM', 'SIGTRAP', 'SIGTSTP', 'SIGTTIN', 'SIGTTOU', 'SIGURG', 'SIGUSR1', 'SIGUSR2', 'SIGVTALRM', 'SIGWINCH', 'SIGXCPU', 'SIGXFSZ']
 
 def receive_signal(signum, stack):
     if signum in [1,2,3,15]:
-        print 'Caught signal %s, exiting.' %(str(signum))
+        print('Caught signal %s, exiting.' %(str(signum)))
         sys.exit()
-    else:        print 'Caught signal %s, ignoring.' %(str(signum))
+    else:        print('Caught signal %s, ignoring.' %(str(signum)))
 
 if __name__ == '__main__':
-    uncatchable = ['SIG_DFL','SIGSTOP','SIGKILL']
-    for i in [x for x in dir(signal) if x.startswith("SIG")]:
-        if not i in uncatchable:
-            signum = getattr(signal,i)
-            signal.signal(signum,receive_signal)
+    # bleeding eyes
+    for sig in all_signals:
+       signum = getattr(signal, sig)
+       signal.signal(signum, receive_signal)
 
     sqs_connection, sqs_queue = queue.create_queue()
     sns_connection, subscription_arn = queue.subscribe_sns(sqs_queue)
@@ -57,7 +57,7 @@ if __name__ == '__main__':
                     requests.get(endpoint)
             if 'commands' in CONFIG:
                 for command in CONFIG["commands"]:
-                    print 'Running command: %s' % command
+                    print('Running command: %s' % command)
                     process = subprocess.Popen(command)
                     while process.poll() is None:
                         time.sleep(30)
